@@ -27,10 +27,20 @@ class Tuxedo_API
      */
     protected $logname;
 
-
+    /**
+     * The HTTP client
+     *
+     * @since  0.0.1
+     * @access protected
+     */
     protected $http_client;
 
-
+    /**
+     * Defaults HTTP headers for curl requests
+     *
+     * @since  0.0.1
+     * @access protected
+     */
     protected $http_headers;
 
     /**
@@ -66,11 +76,7 @@ class Tuxedo_API
     protected $tuxedo_api_password;
 
     /**
-     * Define the core functionality of the plugin.
-     *
-     * Set the plugin name and the plugin version that can be used throughout the plugin.
-     * Load the dependencies, define the locale, and set the hooks for the admin area and
-     * the public-facing side of the site.
+     * Construct method
      *
      * @since 0.0.1
      */
@@ -110,7 +116,6 @@ class Tuxedo_API
     public function import_tuxedo_events()
     {
         $importer = new \TDP_Tuxedo\Tuxedo\Events($parent_instance = $this);
-        // $this->log->info( print_r($importer, true) );
         $importer->run();
     }
 }
