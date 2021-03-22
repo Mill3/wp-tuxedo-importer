@@ -3,6 +3,7 @@
 namespace TDP_Tuxedo\Wp;
 
 use WP_Query;
+use Carbon\Carbon;
 
 class ShowDate
 {
@@ -85,9 +86,22 @@ class ShowDate
      * @access   public
      */
     public function run() {
-        $this->post_ID = $this->get_post();
-        $this->logger->info($this->post_ID);
+        $related_show = $this->get_related_show();
 
+        // no show found, stops here
+        if (!$related_show) {
+            return;
+        }
+
+        // try to get post
+        $this->post_ID = $this->get_post();
+        // if($this->post_ID) {
+        //     $this->logger->info('Post exist : ' . $this->post_ID);
+        // } else {
+        //     $this->logger->info('Post do not exist');
+        // }
+
+        // no post found, create new
         if ( ! $this->post_ID) {
             $this->create_post();
             return;
@@ -110,29 +124,35 @@ class ShowDate
      */
     private function create_post()
     {
-        $this->logger->info('should create a post');
-
-        $related_show = $this->get_related_show();
-
-        // no related, stop here
-        if ( ! $related_show) {
-            return;
-        }
+        $this->logger->info('Create a new post for show : ' . $this->item->showId);
 
         $fields = [
-            'post_title' => $this->item->date,
+            'post_title' => $this->uuid,
+            'post_name' => $this->uuid,
             'post_type' => $this->post_type,
+            'post_content' => $this->uuid,
             'post_status' => 'publish'
         ];
 
         // create post
-        $this->post_ID = wp_insert_post($fields);
+        $post_ID = wp_insert_post($fields);
+
+        // set class created post id
+        $this->post_ID = $post_ID;
+
+        // post not created
+        if(!$this->post_ID) {
+            $this->logger->info('Error : not post inserted for : ' . $this->item->showId);
+            return;
+        };
 
         // set ACF fields meta
         $this->save_or_update_fields();
 
-        $this->logger->info('Created show_date with ID : ' . $this->post_ID);
+        // force update post, will populate Algolia with all fields data
+        $this->force_update();
 
+        // return post ID
         return $post_ID;
     }
 
@@ -147,12 +167,38 @@ class ShowDate
         // stop here if ACF is not installed
         if ( ! class_exists('ACF') ) return;
 
+        // parse and set timezone to Tuxedo item date
+        $parsed_date = Carbon::parse($this->item->date)->setTimezone('America/Toronto');
+
         update_field('uuid', $this->uuid, $this->post_ID);
-        update_field('date', $this->item->date, $this->post_ID);
+        update_field('date', $parsed_date, $this->post_ID);
         update_field('tuxedo_url', $this->item->tuxedoUrl, $this->post_ID);
         update_field('tuxedo_venue_id', $this->item->venueId, $this->post_ID);
-        update_field('tuxedo_soldout', isset($this->item->isSoldOut), $this->post_ID);
+        update_field('tuxedo_soldout', $this->check_is_soldout(), $this->post_ID);
+        // TODO: implement
+        // update_field('school_only', $this->check_is_school_only(), $this->post_ID);
         update_field('show', $this->get_related_show(), $this->post_ID);
+    }
+
+     /**
+     * Check if item is sold out
+     *
+     * @since    0.0.5
+     * @access   private
+     */
+    private function check_is_soldout() {
+        return isset($this->item->isSoldOut);
+    }
+
+     /**
+     * Check if item is for schools
+     * TODO: implement, needs documentation
+     *
+     * @since    0.0.5
+     * @access   private
+     */
+    private function check_is_school_only() {
+        return false;
     }
 
     /**
@@ -171,7 +217,7 @@ class ShowDate
     }
 
     /**
-     * Try to get post based on its UUID value
+     * Try to get post based on its slug/name value using the generated UUID
      *
      * @since    0.0.4
      * @access   private
@@ -180,19 +226,22 @@ class ShowDate
     {
         $args = array(
             'post_type' => $this->post_type,
-            'posts_per_page' => 1,
-            'meta_query' => array(
-                array(
-                    'key'     => 'uuid',
-                    'compare' => '==',
-                    'value'   => $this->uuid,
-                )
-            )
+            'name' => $this->uuid,
+            'posts_per_page' => 1
         );
 
-        $query = new \WP_Query($args);
+        $posts = get_posts($args);
 
-        return isset($query->posts[0]) ? $query->posts[0]->ID : null;
+        return isset($posts[0]) ? $posts[0]->ID : null;
+    }
+
+    private function force_update() {
+        $fields = [
+            'ID' => $this->post_ID,
+            'post_title' => $this->uuid
+        ];
+
+        return wp_update_post($fields);
     }
 
     /**
@@ -206,6 +255,7 @@ class ShowDate
         $args = array(
             'post_type' => $this->post_type_related,
             'posts_per_page' => 1,
+            'post_status' => 'publish',
             'meta_query' => array(
                 array(
                     'key'     => 'tuxedo_show_id',

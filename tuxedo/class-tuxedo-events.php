@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 
+
 class Events extends \TDP_Tuxedo\Tuxedo\Tuxedo_API
 {
     protected $parent_instance;
