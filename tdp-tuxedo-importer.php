@@ -18,7 +18,7 @@ require __DIR__ . '/vendor/autoload.php';
  * Plugin Name:       TDP - Tuxedo importer
  * Plugin URI:        https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * Description:       Plugin for daily importation of data from Tuxedo API
- * Version:           0.0.5
+ * Version:           0.0.6
  * Author:            Mill3 Studio
  * Author URI:        https://mill3.studio/
  * License:           GPL-2.0+
