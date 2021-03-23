@@ -88,18 +88,15 @@ class ShowDate
     public function run() {
         $related_show = $this->get_related_show();
 
-        // no show found, stops here
-        if (!$related_show) {
+        $this->logger->info(print_r($this->item, true));
+
+        // no show found or $item has bool excludedFromTheWeb, stops here
+        if (!$related_show || $this->item->excludedFromTheWeb == true) {
             return;
         }
 
         // try to get post
         $this->post_ID = $this->get_post();
-        // if($this->post_ID) {
-        //     $this->logger->info('Post exist : ' . $this->post_ID);
-        // } else {
-        //     $this->logger->info('Post do not exist');
-        // }
 
         // no post found, create new
         if ( ! $this->post_ID) {
@@ -111,7 +108,7 @@ class ShowDate
         $this->save_or_update_fields();
 
         // send update info to log
-        $this->logger->info('Updated show ID : ' . $post_ID);
+        $this->logger->info('Updated show ID : ' . $this->post_ID);
 
         return $this->post_ID;
     }
@@ -149,8 +146,8 @@ class ShowDate
         // set ACF fields meta
         $this->save_or_update_fields();
 
-        // force update post, will populate Algolia with all fields data
-        $this->force_update();
+
+        // $this->force_update();
 
         // return post ID
         return $post_ID;
@@ -178,6 +175,9 @@ class ShowDate
         // TODO: implement
         // update_field('school_only', $this->check_is_school_only(), $this->post_ID);
         update_field('show', $this->get_related_show(), $this->post_ID);
+
+        // force update post, will populate Algolia with all fields data
+        $this->force_update();
     }
 
      /**
