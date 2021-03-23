@@ -88,10 +88,8 @@ class ShowDate
     public function run() {
         $related_show = $this->get_related_show();
 
-        $this->logger->info(print_r($this->item, true));
-
-        // no show found or $item has bool excludedFromTheWeb, stops here
-        if (!$related_show || $this->item->excludedFromTheWeb == true) {
+        // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
+        if (!$related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
             return;
         }
 
@@ -139,15 +137,11 @@ class ShowDate
 
         // post not created
         if(!$this->post_ID) {
-            $this->logger->info('Error : not post inserted for : ' . $this->item->showId);
             return;
         };
 
         // set ACF fields meta
         $this->save_or_update_fields();
-
-
-        // $this->force_update();
 
         // return post ID
         return $post_ID;

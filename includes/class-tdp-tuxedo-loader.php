@@ -100,12 +100,12 @@ class TDP_Tuxedo_Loader
     private function add($hooks, $hook, $component, $callback, $priority, $accepted_args)
     {
         $hooks[] = array(
-      'hook'          => $hook,
-      'component'     => $component,
-      'callback'      => $callback,
-      'priority'      => $priority,
-      'accepted_args' => $accepted_args
-    );
+            'hook'          => $hook,
+            'component'     => $component,
+            'callback'      => $callback,
+            'priority'      => $priority,
+            'accepted_args' => $accepted_args
+        );
 
         return $hooks;
     }
