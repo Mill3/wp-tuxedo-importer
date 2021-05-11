@@ -6,8 +6,8 @@
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  */
 
 /**
@@ -16,11 +16,11 @@
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      0.0.1
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  * @author     Antoine Girard <antoine@mill3.studio>
  */
-class TDP_Tuxedo_Deactivator
+class WP_tuxedo_Deactivator
 {
 
   /**
@@ -32,7 +32,7 @@ class TDP_Tuxedo_Deactivator
    */
     public static function deactivate()
     {
-        $timestamp = wp_next_scheduled(TDP_TUXEDO_IMPORT_ACTION_NAME);
-        wp_unschedule_event($timestamp, TDP_TUXEDO_IMPORT_ACTION_NAME);
+        $timestamp = wp_next_scheduled(WP_TUXEDO_IMPORT_ACTION_NAME);
+        wp_unschedule_event($timestamp, WP_TUXEDO_IMPORT_ACTION_NAME);
     }
 }

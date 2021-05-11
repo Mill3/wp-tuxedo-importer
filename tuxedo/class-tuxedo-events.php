@@ -1,16 +1,16 @@
 <?php
 
-namespace TDP_Tuxedo\Tuxedo;
+namespace WP_Tuxedo\Tuxedo;
 
 use WP_Query;
-use TDP_Tuxedo\Tuxedo;
-use TDP_Tuxedo\Wp;
+use WP_Tuxedo\Tuxedo;
+use WP_Tuxedo\Wp;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 
 
-class Events extends \TDP_Tuxedo\Tuxedo\Tuxedo_API
+class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
 {
     protected $parent_instance;
 
@@ -79,14 +79,19 @@ class Events extends \TDP_Tuxedo\Tuxedo\Tuxedo_API
         $promise->then(
             function (ResponseInterface $res) {
                 $items = json_decode($res->getBody());
+                // $this->parent_instance->log->info(print_r($items, true));
                 foreach ($items as $key => $item) {
-                    $show_date = new \TDP_Tuxedo\Wp\ShowDate($item, $this->parent_instance->log);
+                    $show_date = new \WP_Tuxedo\Wp\ShowDate($item, $this->parent_instance->log);
                     $show_date->run();
                 }
             }
         );
 
         $promise->wait();
+    }
+
+    private function get() {
+
     }
 
 

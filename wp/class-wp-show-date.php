@@ -1,6 +1,6 @@
 <?php
 
-namespace TDP_Tuxedo\Wp;
+namespace WP_Tuxedo\Wp;
 
 use WP_Query;
 use Carbon\Carbon;
@@ -64,6 +64,9 @@ class ShowDate
      */
     protected $post_ID = null;
 
+
+    protected $related_show = null;
+
     /**
      * Construct method
      *
@@ -73,10 +76,11 @@ class ShowDate
     public function __construct($item = null, $logger = null)
     {
         $this->item = $item;
-
         $this->logger = $logger;
-
         $this->uuid = $this->generate_uuid();
+        $this->parsed_date = $this->parse_date();
+        $this->related_show = $this->get_related_show();
+        $this->post_title = $this->generate_post_title();
     }
 
     /**
@@ -86,10 +90,9 @@ class ShowDate
      * @access   public
      */
     public function run() {
-        $related_show = $this->get_related_show();
 
         // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
-        if (!$related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
+        if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
             return;
         }
 
@@ -106,7 +109,7 @@ class ShowDate
         $this->save_or_update_fields();
 
         // send update info to log
-        $this->logger->info('Updated show ID : ' . $this->post_ID);
+        $this->logger->info('Created or updated show ID : ' . $this->post_ID);
 
         return $this->post_ID;
     }
@@ -119,10 +122,9 @@ class ShowDate
      */
     private function create_post()
     {
-        $this->logger->info('Create a new post for show : ' . $this->item->showId);
 
         $fields = [
-            'post_title' => $this->uuid,
+            'post_title' => $this->post_title,
             'post_name' => $this->uuid,
             'post_type' => $this->post_type,
             'post_content' => $this->uuid,
@@ -155,20 +157,21 @@ class ShowDate
      */
     private function save_or_update_fields()
     {
+
         // stop here if ACF is not installed
         if ( ! class_exists('ACF') ) return;
 
-        // parse and set timezone to Tuxedo item date
-        $parsed_date = Carbon::parse($this->item->date)->setTimezone('America/Toronto');
+        $this->logger->info($this->parsed_date);
 
         update_field('uuid', $this->uuid, $this->post_ID);
-        update_field('date', $parsed_date, $this->post_ID);
+        update_field('date', $this->parsed_date, $this->post_ID);
         update_field('tuxedo_url', $this->item->tuxedoUrl, $this->post_ID);
         update_field('tuxedo_venue_id', $this->item->venueId, $this->post_ID);
+        update_field('tuxedo_is_published', $this->item->isPublished, $this->post_ID);
         update_field('tuxedo_soldout', $this->check_is_soldout(), $this->post_ID);
         // TODO: implement
         // update_field('school_only', $this->check_is_school_only(), $this->post_ID);
-        update_field('show', $this->get_related_show(), $this->post_ID);
+        update_field('show', $this->related_show->ID, $this->post_ID);
 
         // force update post, will populate Algolia with all fields data
         $this->force_update();
@@ -211,6 +214,34 @@ class ShowDate
     }
 
     /**
+     * Generate a post title
+     *
+     * @since    0.2.0
+     * @access   private
+     */
+    private function generate_post_title()
+    {
+        // join
+        return implode([$this->related_show->post_title, $this->parsed_date], " @ ");
+    }
+
+    /**
+     * Parse API date to PHP date object in current timezone
+     *
+     * @since    0.2.0
+     * @access   private
+     */
+    private function parse_date()
+    {
+        if(!$this->item->date) return;
+
+        // join and hash it
+        // parse and set timezone to Tuxedo item date
+        return Carbon::parse($this->item->date)->setTimezone('America/Toronto');
+    }
+
+
+    /**
      * Try to get post based on its slug/name value using the generated UUID
      *
      * @since    0.0.4
@@ -232,7 +263,7 @@ class ShowDate
     private function force_update() {
         $fields = [
             'ID' => $this->post_ID,
-            'post_title' => $this->uuid
+            'post_title' => $this->post_title
         ];
 
         return wp_update_post($fields);
@@ -252,7 +283,7 @@ class ShowDate
             'post_status' => 'publish',
             'meta_query' => array(
                 array(
-                    'key'     => 'tuxedo_show_id',
+                    'key'     => 'tuxedo',
                     'compare' => '==',
                     'value'   => $this->item->showId,
                 )
@@ -261,7 +292,7 @@ class ShowDate
 
         $query = new \WP_Query($args);
 
-        return isset($query->posts[0]) ? $query->posts[0]->ID : null;
+        return isset($query->posts[0]) ? $query->posts[0] : null;
     }
 
 }

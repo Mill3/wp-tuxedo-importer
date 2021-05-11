@@ -8,8 +8,8 @@
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/admin/partials
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/admin/partials
  */
 ?>
 

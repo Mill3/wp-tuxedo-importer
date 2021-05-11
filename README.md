@@ -1,4 +1,4 @@
-# WordPress - TDP Plugin Tuxedo API Importer
+# WordPress - WP Plugin Tuxedo API Importer
 
 https://api.tuxedoticket.ca/documentation
 

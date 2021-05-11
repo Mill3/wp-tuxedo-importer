@@ -6,8 +6,8 @@
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  */
 
 
@@ -17,11 +17,11 @@
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      0.0.1
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  * @author     Antoine Girard <antoine@mill3.studio>
  */
-class TDP_Tuxedo_Activator
+class WP_tuxedo_Activator
 {
 
   /**
@@ -33,8 +33,8 @@ class TDP_Tuxedo_Activator
    */
     public static function activate()
     {
-        if (!wp_next_scheduled(TDP_TUXEDO_IMPORT_ACTION_NAME)) {
-            wp_schedule_event(time(), TDP_TUXEDO_CRON_SCHEDULE, TDP_TUXEDO_IMPORT_ACTION_NAME);
+        if (!wp_next_scheduled(WP_TUXEDO_IMPORT_ACTION_NAME)) {
+            wp_schedule_event(time(), WP_TUXEDO_CRON_SCHEDULE, WP_TUXEDO_IMPORT_ACTION_NAME);
         }
     }
 }

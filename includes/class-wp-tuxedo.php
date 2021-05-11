@@ -1,7 +1,5 @@
 <?php
 
-
-
 /**
  * The file that defines the core plugin class
  *
@@ -11,8 +9,8 @@
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  */
 
 /**
@@ -25,11 +23,11 @@
  * version of the plugin.
  *
  * @since      0.0.1
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  * @author     Antoine Girard <antoine@mill3.studio>
  */
-class TDP_Tuxedo_Importer
+class WP_Tuxedo_Importer
 {
 
   /**
@@ -40,7 +38,7 @@ class TDP_Tuxedo_Importer
    * @access   protected
    * @var      Plugin_Name_Loader    $loader    Maintains and registers all hooks for the plugin.
    */
-    protected $loader;
+    public $loader;
 
     /**
      * The unique identifier of this plugin.
@@ -71,13 +69,13 @@ class TDP_Tuxedo_Importer
      */
     public function __construct()
     {
-        if (defined('TDP_TUXEDO_VERSION')) {
-            $this->version = TDP_TUXEDO_VERSION;
+        if (defined('WP_TUXEDO_VERSION')) {
+            $this->version = WP_TUXEDO_VERSION;
         } else {
             $this->version = '0.0.1';
         }
 
-        $this->plugin_name = 'tdp-tuxedo';
+        $this->plugin_name = 'wp-tuxedo';
 
         $this->load_dependencies();
         $this->define_admin_hooks();
@@ -106,12 +104,12 @@ class TDP_Tuxedo_Importer
      * The class responsible for orchestrating the actions and filters of the
      * core plugin.
      */
-        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-tdp-tuxedo-loader.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-wp-tuxedo-loader.php';
 
         /**
          * The class responsible for defining all actions that occur in the admin area.
          */
-        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-tdp-tuxedo-admin.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-wp-tuxedo-admin.php';
 
         /**
          * The classes responsible for handling Tuxedo API actions
@@ -125,7 +123,7 @@ class TDP_Tuxedo_Importer
         require_once plugin_dir_path(dirname(__FILE__)) . 'wp/class-wp-show-date.php';
 
         // set loader
-        $this->loader = new TDP_Tuxedo_Loader();
+        $this->loader = new WP_Tuxedo_Loader();
     }
 
     /**
@@ -137,10 +135,10 @@ class TDP_Tuxedo_Importer
      */
     private function define_admin_hooks()
     {
-        $plugin_admin = new TDP_Tuxedo_Admin($this->get_plugin_name(), $this->get_version());
+        $wp_tuxedo_admin = new WP_Tuxedo_Admin($this->get_plugin_name(), $this->get_version());
 
         // register action in plugin admin class
-        $this->loader->add_action(TDP_TUXEDO_IMPORT_ACTION_NAME, $plugin_admin, 'wp_cron_tuxedo_import');
+        $this->loader->add_action(WP_TUXEDO_IMPORT_ACTION_NAME, $wp_tuxedo_admin, 'wp_tuxedo_admin_cron_task');
     }
 
 

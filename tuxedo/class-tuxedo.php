@@ -1,6 +1,6 @@
 <?php
 
-namespace TDP_Tuxedo\Tuxedo;
+namespace WP_Tuxedo\Tuxedo;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -115,7 +115,7 @@ class Tuxedo_API
 
     public function import_tuxedo_events()
     {
-        $importer = new \TDP_Tuxedo\Tuxedo\Events($parent_instance = $this);
+        $importer = new \WP_Tuxedo\Tuxedo\Events($parent_instance = $this);
         $importer->run();
     }
 }

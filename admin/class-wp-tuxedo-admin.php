@@ -2,7 +2,7 @@
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use TDP_Tuxedo\Tuxedo;
+use WP_Tuxedo\Tuxedo;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -10,8 +10,8 @@ use TDP_Tuxedo\Tuxedo;
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/admin
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/admin
  */
 
 /**
@@ -20,11 +20,11 @@ use TDP_Tuxedo\Tuxedo;
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/admin
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/admin
  * @author     Antoine Girard <antoine@mill3.studio>
  */
-class TDP_Tuxedo_Admin
+class WP_Tuxedo_Admin
 {
 
   /**
@@ -52,6 +52,9 @@ class TDP_Tuxedo_Admin
      */
     private $log;
 
+
+    private $tuxedo_instance;
+
     /**
      * Initialize the class and set its properties.
      *
@@ -63,6 +66,12 @@ class TDP_Tuxedo_Admin
     {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
+
+        $this->logname = 'wp-tuxedo-admin';
+        // create a logger
+        $this->log = new Logger($this->logname);
+        $this->log->pushHandler(new StreamHandler(__DIR__."/logs/{$this->logname}.log", Logger::DEBUG));
+        $this->tuxedo_instance = new \WP_Tuxedo\Tuxedo\Tuxedo_API();
     }
 
     /**
@@ -88,9 +97,9 @@ class TDP_Tuxedo_Admin
     /**
      * Register cron jobs
      */
-    public function wp_cron_tuxedo_import()
+    public function wp_tuxedo_admin_cron_task()
     {
-        $tuxedo = new \TDP_Tuxedo\Tuxedo\Tuxedo_API();
-        $tuxedo->run();
+        $this->log->info('Starting wp_tuxedo_admin_cron_task');
+        $this->tuxedo_instance->run();
     }
 }

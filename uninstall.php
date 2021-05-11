@@ -22,7 +22,7 @@
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    TDP_Tuxedo
+ * @package    WP_TUXEDO
  */
 
 // If uninstall not called from WordPress, then exit.

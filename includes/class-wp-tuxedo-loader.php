@@ -6,8 +6,8 @@
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  */
 
 /**
@@ -17,11 +17,11 @@
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    TDP_Tuxedo
- * @subpackage TDP_Tuxedo/includes
+ * @package    WP_TUXEDO
+ * @subpackage WP_TUXEDO/includes
  * @author     Antoine Girard <antoine@mill3.studio>
  */
-class TDP_Tuxedo_Loader
+class WP_Tuxedo_Loader
 {
 
   /**
@@ -120,7 +120,6 @@ class TDP_Tuxedo_Loader
         foreach ($this->filters as $hook) {
             add_filter($hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args']);
         }
-
         foreach ($this->actions as $hook) {
             add_action($hook['hook'], array( $hook['component'], $hook['callback'] ), $hook['priority'], $hook['accepted_args']);
         }
