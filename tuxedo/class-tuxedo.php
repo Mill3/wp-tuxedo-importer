@@ -82,15 +82,18 @@ class Tuxedo_API
      */
     public function __construct()
     {
-        $this->logname = 'tuxedo-run';
-        $this->tuxedo_api_base_uri = TUXEDO_BASE_URI;
-        $this->tuxedo_api_account_name = TUXEDO_ACCOUNT_NAME;
-        $this->tuxedo_api_username = TUXEDO_USERNAME;
-        $this->tuxedo_api_password = TUXEDO_PASSWORD;
 
-        // create a logger
-        $this->log = new Logger($this->logname);
-        $this->log->pushHandler(new StreamHandler(__DIR__."/logs/{$this->logname}.log", Logger::DEBUG));
+        $this->settings = get_option( 'wp_tuxedo_settings' );
+
+        if(!$this->settings) {
+            apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo settings not saved', 'error');
+            return;
+        }
+
+        $this->tuxedo_api_base_uri = TUXEDO_BASE_URI;
+        $this->tuxedo_api_account_name = $this->settings['tuxedo_account'];
+        $this->tuxedo_api_username = $this->settings['tuxedo_username'];
+        $this->tuxedo_api_password = $this->settings['tuxedo_password'];
 
         // create client
         $this->http_client = new \GuzzleHttp\Client(

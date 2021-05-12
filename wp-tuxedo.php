@@ -45,9 +45,31 @@ define('WP_TUXEDO_VERSION', '0.2.0');
 /**
  * Define various constants
  */
-define('WP_TUXEDO_IMPORT_ACTION_NAME', 'wp_tuxedo/import_all');
-define('WP_TUXEDO_CRON_SCHEDULE', 'wp_tuxedo_cron_schedule');
-define('WP_TUXEDO_CRON_SCHEDULE_DURATION', 60);
+
+if ( ! defined( 'WP_TUXEDO_PLUGIN_DIR' ) ) {
+    define( 'WP_TUXEDO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+}
+
+if (! defined('WP_TUXEDO_NAMESPACE_PREFIX')) {
+    define('WP_TUXEDO_NAMESPACE_PREFIX', 'wp_tuxedo');
+}
+
+if (! defined('WP_TUXEDO_IMPORT_ACTION_NAME')) {
+    define('WP_TUXEDO_IMPORT_ACTION_NAME', WP_TUXEDO_NAMESPACE_PREFIX . "/import_all");
+}
+
+if (! defined('WP_TUXEDO_CRON_SCHEDULE')) {
+    define('WP_TUXEDO_CRON_SCHEDULE', WP_TUXEDO_NAMESPACE_PREFIX . "_cron_schedule");
+}
+
+if (! defined('WP_TUXEDO_CRON_SCHEDULE_DURATION')) {
+    define('WP_TUXEDO_CRON_SCHEDULE_DURATION', 3600 * 2); // every 2 hours
+    // define('WP_TUXEDO_CRON_SCHEDULE_DURATION', 180); // every 2 hours
+}
+
+if (! defined('WP_TUXEDO_POST_TYPE')) {
+    define('WP_TUXEDO_POST_TYPE', "show_date");
+}
 
 /**
  * The code that runs during plugin activation.
@@ -105,9 +127,9 @@ require plugin_dir_path(__FILE__) . 'includes/class-wp-tuxedo.php';
  */
 function run_wp_tuxedo()
 {
-    $root = new WP_Tuxedo_Importer();
-    // print_r($root);
+    $root = new WP_Tuxedo();
     $root->run();
+    // apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'foobar', 'notice');
 }
 
 run_wp_tuxedo();

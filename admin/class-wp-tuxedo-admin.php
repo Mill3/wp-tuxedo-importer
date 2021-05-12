@@ -1,14 +1,15 @@
 <?php
 
-use Monolog\Handler\StreamHandler;
+use Monolog\Handler\RotatingFileHandler;
+use Monolog\Formatter\HtmlFormatter;
 use Monolog\Logger;
 use WP_Tuxedo\Tuxedo;
 
 /**
  * The admin-specific functionality of the plugin.
  *
- * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
- * @since      0.0.1
+ * @link  https://github.com/Mill3/denise-pelletier-tuxedo-importer
+ * @since 0.0.1
  *
  * @package    WP_TUXEDO
  * @subpackage WP_TUXEDO/admin
@@ -27,21 +28,21 @@ use WP_Tuxedo\Tuxedo;
 class WP_Tuxedo_Admin
 {
 
-  /**
-   * The ID of this plugin.
-   *
-   * @since    0.0.1
-   * @access   private
-   * @var      string    $plugin_name    The ID of this plugin.
-   */
+    /**
+     * The ID of this plugin.
+     *
+     * @since  0.0.1
+     * @access private
+     * @var    string    $plugin_name    The ID of this plugin.
+     */
     private $plugin_name;
 
     /**
      * The version of this plugin.
      *
-     * @since    0.0.1
-     * @access   private
-     * @var      string    $version    The current version of this plugin.
+     * @since  0.0.1
+     * @access private
+     * @var    string    $version    The current version of this plugin.
      */
     private $version;
 
@@ -50,34 +51,42 @@ class WP_Tuxedo_Admin
      *
      * @var object
      */
-    private $log;
+    public $log;
 
 
-    private $tuxedo_instance;
+    public $tuxedo_instance;
 
     /**
      * Initialize the class and set its properties.
      *
-     * @since    0.0.1
-     * @param      string    $plugin_name       The name of this plugin.
-     * @param      string    $version    The version of this plugin.
+     * @since 0.0.1
+     * @param string $plugin_name The name of this plugin.
+     * @param string $version     The version of this plugin.
      */
     public function __construct($plugin_name, $version)
     {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
 
-        $this->logname = 'wp-tuxedo-admin';
         // create a logger
+        $this->logname = 'wp-tuxedo-log';
+        $this->formatter = new HtmlFormatter();
+        $this->stream = new RotatingFileHandler(__DIR__."/logs/{$this->logname}.html", 5, Logger::DEBUG);
+        $this->stream->setFormatter($this->formatter);
         $this->log = new Logger($this->logname);
-        $this->log->pushHandler(new StreamHandler(__DIR__."/logs/{$this->logname}.log", Logger::DEBUG));
+        $this->log->pushHandler($this->stream);
+
+        // create tuxedo main importer class instance
         $this->tuxedo_instance = new \WP_Tuxedo\Tuxedo\Tuxedo_API();
+
+        // force run with GET param
+        add_action('admin_init', array($this, 'force_run'));
     }
 
     /**
      * Register the stylesheets for the admin area.
      *
-     * @since    0.0.1
+     * @since 0.0.1
      */
     public function enqueue_styles()
     {
@@ -87,7 +96,7 @@ class WP_Tuxedo_Admin
     /**
      * Register the JavaScript for the admin area.
      *
-     * @since    0.0.1
+     * @since 0.0.1
      */
     public function enqueue_scripts()
     {
@@ -95,11 +104,71 @@ class WP_Tuxedo_Admin
     }
 
     /**
+     * Filter wp_tuxedo/log_event
+     *
+     * Filter for sending message to plugin log file
+     *
+     * @since 0.2.0
+     */
+    public function log_event($message, $level = 'info')
+    {
+        switch ($level) {
+        case 'error':
+            $this->log->error($message);
+            $this->log->reset();
+            break;
+        case 'notice':
+            $this->log->notice($message);
+            $this->log->reset();
+            break;
+        case 'warning':
+            $this->log->warning($message);
+            $this->log->reset();
+            break;
+        default:
+            $this->log->info($message);
+            $this->log->reset();
+            break;
+        }
+    }
+
+    public function force_run() {
+         if( isset($_GET['wp_tuxedo_run_cron']) ) {
+            // print_r($this->tuxedo_instance);
+            // $this->wp_tuxedo_admin_cron_task();
+            // echo WP_TUXEDO_IMPORT_ACTION_NAME;
+            add_action( 'admin_notices', array($this, 'run_notice') );
+            $this->log_event('Cron: wp_tuxedo_admin_cron_task force run run....', 'notice');
+            $this->tuxedo_instance->run();
+            wp_redirect( admin_url( '/tools.php?page=wp_tuxedo_logs' ) );
+            exit;
+        }
+    }
+
+    public function run_notice() {
+        ?>
+        <div class="notice notice-success is-dismissible">
+            <p><?php _e( 'Done!', 'sample-text-domain' ); ?></p>
+        </div>
+        <?php
+    }
+
+    /**
      * Register cron jobs
+     *
+     * @since 0.0.1
      */
     public function wp_tuxedo_admin_cron_task()
     {
-        $this->log->info('Starting wp_tuxedo_admin_cron_task');
-        $this->tuxedo_instance->run();
+        $this->settings = get_option('wp_tuxedo_settings');
+
+        if (isset($this->settings['tuxedo_active'])) {
+            $this->log_event('Cron: wp_tuxedo_admin_cron_task starting...', 'notice');
+            $this->tuxedo_instance->run();
+        } else {
+            $this->log_event('Cron: wp_tuxedo_admin_cron_task is paused, passing...', 'warning');
+        }
+
+        wp_die();
     }
 }

@@ -22,7 +22,7 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
     public function run()
     {
         // log start
-        $this->parent_instance->log->info('Starting show_date importation..');
+        apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Starting show_date importation..', 'notice');
 
         // start with auth
         $this->auth();
@@ -48,13 +48,13 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                     return;
                 }
 
-                $this->parent_instance->log->info('Authenticated!');
+                apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Authenticated to Tuxedo', 'notice');
 
                 // parse reponse
                 $this->parse($res);
             },
             function (RequestException $e) {
-                $this->parent_instance->log->info($e->getMessage());
+                apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
             }
         );
 
@@ -79,9 +79,8 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
         $promise->then(
             function (ResponseInterface $res) {
                 $items = json_decode($res->getBody());
-                // $this->parent_instance->log->info(print_r($items, true));
                 foreach ($items as $key => $item) {
-                    $show_date = new \WP_Tuxedo\Wp\ShowDate($item, $this->parent_instance->log);
+                    $show_date = new \WP_Tuxedo\Wp\ShowDate($item);
                     $show_date->run();
                 }
             }
@@ -89,10 +88,5 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
 
         $promise->wait();
     }
-
-    private function get() {
-
-    }
-
 
 }

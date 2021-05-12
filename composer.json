@@ -2,6 +2,7 @@
     "require": {
         "guzzlehttp/guzzle": "^7.0",
         "monolog/monolog": "^2.1",
-        "nesbot/carbon": "^2.46"
+        "nesbot/carbon": "^2.46",
+        "wp-user-manager/wp-optionskit": "^1.0"
     }
 }

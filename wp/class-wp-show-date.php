@@ -15,7 +15,7 @@ class ShowDate
      * @access   public
      * @var      string    $post_type
      */
-    public $post_type = 'show_date';
+    public $post_type = WP_TUXEDO_POST_TYPE;
 
     /**
      * Related post type
@@ -36,15 +36,6 @@ class ShowDate
      * @var      object    $item
      */
     protected $item;
-
-    /**
-     * A logger instance sent to class
-     *
-     * @since    0.0.4
-     * @access   protected
-     * @var      object    $logger
-     */
-    protected $logger;
 
     /**
      * A unique ID generated based on item values
@@ -73,14 +64,13 @@ class ShowDate
      * @since    0.0.4
      * @access   public
      */
-    public function __construct($item = null, $logger = null)
+    public function __construct($item = null)
     {
         $this->item = $item;
-        $this->logger = $logger;
         $this->uuid = $this->generate_uuid();
         $this->parsed_date = $this->parse_date();
         $this->related_show = $this->get_related_show();
-        $this->post_title = $this->generate_post_title();
+        // $this->post_title = $this->generate_post_title();
     }
 
     /**
@@ -91,10 +81,14 @@ class ShowDate
      */
     public function run() {
 
+        // todo: skip past show dates
         // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
         if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
             return;
         }
+
+        // generate post title
+        $this->post_title = $this->generate_post_title();
 
         // try to get post
         $this->post_ID = $this->get_post();
@@ -107,9 +101,6 @@ class ShowDate
 
         // post exist, update fields
         $this->save_or_update_fields();
-
-        // send update info to log
-        $this->logger->info('Created or updated show ID : ' . $this->post_ID);
 
         return $this->post_ID;
     }
@@ -159,9 +150,10 @@ class ShowDate
     {
 
         // stop here if ACF is not installed
-        if ( ! class_exists('ACF') ) return;
-
-        $this->logger->info($this->parsed_date);
+        if ( ! class_exists('ACF') ) {
+            apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Advanced custom fields is not installed', 'error');
+            return;
+        };
 
         update_field('uuid', $this->uuid, $this->post_ID);
         update_field('date', $this->parsed_date, $this->post_ID);
@@ -169,12 +161,16 @@ class ShowDate
         update_field('tuxedo_venue_id', $this->item->venueId, $this->post_ID);
         update_field('tuxedo_is_published', $this->item->isPublished, $this->post_ID);
         update_field('tuxedo_soldout', $this->check_is_soldout(), $this->post_ID);
+
         // TODO: implement
         // update_field('school_only', $this->check_is_school_only(), $this->post_ID);
         update_field('show', $this->related_show->ID, $this->post_ID);
 
         // force update post, will populate Algolia with all fields data
         $this->force_update();
+
+        // send update info to loger
+        apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show : ' . $this->post_title, 'warn');
     }
 
      /**
@@ -222,7 +218,7 @@ class ShowDate
     private function generate_post_title()
     {
         // join
-        return implode([$this->related_show->post_title, $this->parsed_date], " @ ");
+        return implode([$this->related_show->post_title, $this->parsed_date->locale('fr')->isoFormat('LLLL')], " @ ");
     }
 
     /**
@@ -235,11 +231,9 @@ class ShowDate
     {
         if(!$this->item->date) return;
 
-        // join and hash it
         // parse and set timezone to Tuxedo item date
         return Carbon::parse($this->item->date)->setTimezone('America/Toronto');
     }
-
 
     /**
      * Try to get post based on its slug/name value using the generated UUID
@@ -260,6 +254,12 @@ class ShowDate
         return isset($posts[0]) ? $posts[0]->ID : null;
     }
 
+    /**
+     * Force a post update with title
+     *
+     * @since    0.0.4
+     * @access   private
+     */
     private function force_update() {
         $fields = [
             'ID' => $this->post_ID,

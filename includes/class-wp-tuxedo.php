@@ -1,5 +1,9 @@
 <?php
 
+// if(!function_exists('wp_get_current_user')) {
+//     include(ABSPATH . "wp-includes/pluggable.php");
+// }
+
 /**
  * The file that defines the core plugin class
  *
@@ -27,7 +31,7 @@
  * @subpackage WP_TUXEDO/includes
  * @author     Antoine Girard <antoine@mill3.studio>
  */
-class WP_Tuxedo_Importer
+class WP_Tuxedo
 {
 
   /**
@@ -79,6 +83,7 @@ class WP_Tuxedo_Importer
 
         $this->load_dependencies();
         $this->define_admin_hooks();
+
     }
 
     /**
@@ -110,6 +115,8 @@ class WP_Tuxedo_Importer
          * The class responsible for defining all actions that occur in the admin area.
          */
         require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-wp-tuxedo-admin.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-wp-tuxedo-menu-settings.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-wp-tuxedo-menu-system.php';
 
         /**
          * The classes responsible for handling Tuxedo API actions
@@ -135,10 +142,26 @@ class WP_Tuxedo_Importer
      */
     private function define_admin_hooks()
     {
+        // create admin instance
         $wp_tuxedo_admin = new WP_Tuxedo_Admin($this->get_plugin_name(), $this->get_version());
+        $wp_tuxedo_menu_settings = new WP_Tuxedo_Menu_Settings();
+        $wp_tuxedo_menu_logs = new WP_Tuxedo_Menu_System();
 
-        // register action in plugin admin class
+        // actions
         $this->loader->add_action(WP_TUXEDO_IMPORT_ACTION_NAME, $wp_tuxedo_admin, 'wp_tuxedo_admin_cron_task');
+        // echo 'wp_ajax_' . WP_TUXEDO_NAMESPACE_PREFIX . '_run_cron';
+        // $this->loader->add_action('wp_ajax_wp_tuxedo_run_cron', $this, 'foobar');
+        // add_action( 'wp_ajax_wp_tuxedo_run_cron', array($this, 'foobar') );
+        // add_action( 'wp_ajax_nopriv_wp_tuxedo_run_cron', array($this, 'foobar') );
+
+        // filters
+        $this->loader->add_filter(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $wp_tuxedo_admin, 'log_event', 10, 2);
+
+    }
+
+    public function foobar() {
+        echo "1";
+        die();
     }
 
 
