@@ -18,7 +18,7 @@ require __DIR__ . '/vendor/autoload.php';
  * Plugin Name:       WP - Tuxedo importer
  * Plugin URI:        https://github.com/Mill3/wp-tuxedo-importer
  * Description:       Plugin for daily importation of data from Tuxedo API
- * Version:           0.2.0
+ * Version:           0.2.1
  * Author:            Mill3 Studio
  * Author URI:        https://mill3.studio/
  * License:           GPL-2.0+
