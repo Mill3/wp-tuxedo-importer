@@ -32,19 +32,18 @@ if ( ! defined('WPINC') ) {
     die;
 }
 
-if ( ! defined('TUXEDO_BASE_URI') ) {
-    return;
-}
-
-
 /**
  * Currently plugin version.
  */
-define('WP_TUXEDO_VERSION', '0.2.0');
+define('WP_TUXEDO_VERSION', '0.2.1');
 
 /**
  * Define various constants
  */
+
+if ( ! defined( 'TUXEDO_BASE_URI' ) ) {
+    define( 'TUXEDO_BASE_URI', 'https://api.tuxedoticket.ca/' );
+}
 
 if ( ! defined( 'WP_TUXEDO_PLUGIN_DIR' ) ) {
     define( 'WP_TUXEDO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
@@ -64,7 +63,6 @@ if (! defined('WP_TUXEDO_CRON_SCHEDULE')) {
 
 if (! defined('WP_TUXEDO_CRON_SCHEDULE_DURATION')) {
     define('WP_TUXEDO_CRON_SCHEDULE_DURATION', 3600 * 2); // every 2 hours
-    // define('WP_TUXEDO_CRON_SCHEDULE_DURATION', 180); // every 2 hours
 }
 
 if (! defined('WP_TUXEDO_POST_TYPE')) {
