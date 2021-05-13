@@ -62,7 +62,7 @@ if (! defined('WP_TUXEDO_CRON_SCHEDULE')) {
 }
 
 if (! defined('WP_TUXEDO_CRON_SCHEDULE_DURATION')) {
-    define('WP_TUXEDO_CRON_SCHEDULE_DURATION', 3600 * 2); // every 2 hours
+    define('WP_TUXEDO_CRON_SCHEDULE_DURATION', 3600 * 12); // every 12 hours
 }
 
 if (! defined('WP_TUXEDO_POST_TYPE')) {
