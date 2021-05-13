@@ -1,5 +1,8 @@
 <?php
 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 use Monolog\Handler\StreamHandler;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Logger;

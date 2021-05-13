@@ -1,8 +1,7 @@
 <?php
 
-// if(!function_exists('wp_get_current_user')) {
-//     include(ABSPATH . "wp-includes/pluggable.php");
-// }
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 use WP_Tuxedo\Tuxedo;
 
@@ -45,6 +44,7 @@ class WP_Tuxedo_Menu_System
     {
         add_action('admin_menu', array( $this, 'admin_page_setup_menu' ), 10);
         add_action('admin_bar_menu', array($this, 'admin_page_toolbar_action'), 999);
+        // add_action('admin_notices', array($this, 'admin_notice'));
     }
 
     /**
@@ -56,7 +56,7 @@ class WP_Tuxedo_Menu_System
     }
 
     /**
-     * Set options page menu item
+     * Set a menu item in WP admin toolbar
      */
     public function admin_page_toolbar_action($wp_admin_bar)
     {
@@ -69,7 +69,7 @@ class WP_Tuxedo_Menu_System
         );
     }
 
-    public function system_check()
+    private function system_check()
     {
         // check if ACF is installed
         $this->system_checks_list['acf'] = class_exists('ACF');
@@ -101,14 +101,19 @@ class WP_Tuxedo_Menu_System
         return ($files) ? $files : false;
     }
 
+    public function admin_notice()
+    {
+        echo '<div class="notice notice-info is-dismissible">notice!!</div>';
+    }
+
     /**
-     * Render page
+     * Render system page
      *
      * @return string
      */
     public function render()
     {
-        // get logs
+        // get log files
         $directory = WP_TUXEDO_PLUGIN_DIR . '/admin/logs/';
         $files = $this->get_log($directory);
 

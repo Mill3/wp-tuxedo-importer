@@ -129,7 +129,10 @@ function run_wp_tuxedo()
 {
     $root = new WP_Tuxedo();
     $root->run();
-    // apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'foobar', 'notice');
+
+    // test actions here
+    // $shows = apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/tuxedo_api/get_shows', null);
+    // print_r($shows);
 }
 
 run_wp_tuxedo();

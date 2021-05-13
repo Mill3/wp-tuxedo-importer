@@ -10,19 +10,12 @@ use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
 
 
-class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
+class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
 {
-    protected $parent_instance;
-
-    public function __construct($parent_instance = null)
-    {
-        $this->parent_instance = $parent_instance;
-    }
-
     public function run()
     {
         // log start
-        apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Starting show_date importation..', 'notice');
+        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Starting show_date importation..', 'notice');
 
         // start with auth
         $this->auth();
@@ -32,14 +25,14 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
     {
         $body = json_encode(
             [
-                'accountName' => $this->parent_instance->tuxedo_api_account_name,
-                'username' => $this->parent_instance->tuxedo_api_username,
-                'password' => $this->parent_instance->tuxedo_api_password,
+                'accountName' => $this->tuxedo_api_account_name,
+                'username' => $this->tuxedo_api_username,
+                'password' => $this->tuxedo_api_password,
             ]
         );
 
-        $request = new Request('POST', 'v1/authentication', $this->parent_instance->http_headers, $body);
-        $promise = $this->parent_instance->http_client->sendAsync($request);
+        $request = new Request('POST', 'v1/authentication', $this->http_headers, $body);
+        $promise = $this->http_client->sendAsync($request);
 
         $promise->then(
             function (ResponseInterface $res) {
@@ -48,13 +41,13 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                     return;
                 }
 
-                apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Authenticated to Tuxedo', 'notice');
+                do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Authenticated to Tuxedo', 'notice');
 
                 // parse reponse
                 $this->parse($res);
             },
             function (RequestException $e) {
-                apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
+                do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
             }
         );
 
@@ -74,7 +67,7 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
         ];
 
         $request = new Request('GET', 'v1/events', $header);
-        $promise = $this->parent_instance->http_client->sendAsync($request);
+        $promise = $this->http_client->sendAsync($request);
 
         $promise->then(
             function (ResponseInterface $res) {
@@ -83,6 +76,8 @@ class Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                     $show_date = new \WP_Tuxedo\Wp\ShowDate($item);
                     $show_date->run();
                 }
+                // send notice
+                do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Finished importing all Tuxedo events', 'notice');
             }
         );
 

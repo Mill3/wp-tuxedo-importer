@@ -151,7 +151,7 @@ class ShowDate
 
         // stop here if ACF is not installed
         if ( ! class_exists('ACF') ) {
-            apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Advanced custom fields is not installed', 'error');
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Advanced custom fields is not installed', 'error');
             return;
         };
 
@@ -170,7 +170,7 @@ class ShowDate
         $this->force_update();
 
         // send update info to loger
-        apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show : ' . $this->post_title, 'warn');
+        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show : ' . $this->post_title, 'warn');
     }
 
      /**
@@ -283,7 +283,7 @@ class ShowDate
             'post_status' => 'publish',
             'meta_query' => array(
                 array(
-                    'key'     => 'tuxedo',
+                    'key'     => 'tuxedo_show_id',
                     'compare' => '==',
                     'value'   => $this->item->showId,
                 )

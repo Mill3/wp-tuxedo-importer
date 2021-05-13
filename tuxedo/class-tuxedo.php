@@ -86,7 +86,7 @@ class Tuxedo_API
         $this->settings = get_option( 'wp_tuxedo_settings' );
 
         if(!$this->settings) {
-            apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo settings not saved', 'error');
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo settings not saved', 'error');
             return;
         }
 
@@ -110,15 +110,4 @@ class Tuxedo_API
         ];
     }
 
-
-    public function run()
-    {
-        $this->import_tuxedo_events();
-    }
-
-    public function import_tuxedo_events()
-    {
-        $importer = new \WP_Tuxedo\Tuxedo\Events($parent_instance = $this);
-        $importer->run();
-    }
 }

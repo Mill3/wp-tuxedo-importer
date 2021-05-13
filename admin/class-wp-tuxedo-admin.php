@@ -1,5 +1,8 @@
 <?php
 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) exit;
+
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\HtmlFormatter;
 use Monolog\Logger;
@@ -77,7 +80,7 @@ class WP_Tuxedo_Admin
         $this->log->pushHandler($this->stream);
 
         // create tuxedo main importer class instance
-        $this->tuxedo_instance = new \WP_Tuxedo\Tuxedo\Tuxedo_API();
+        $this->tuxedo_api_events_instance = new \WP_Tuxedo\Tuxedo\Tuxedo_API_Events();
 
         // force run with GET param
         add_action('admin_init', array($this, 'force_run'));
@@ -134,21 +137,23 @@ class WP_Tuxedo_Admin
 
     public function force_run() {
          if( isset($_GET['wp_tuxedo_run_cron']) ) {
-            // print_r($this->tuxedo_instance);
-            // $this->wp_tuxedo_admin_cron_task();
-            // echo WP_TUXEDO_IMPORT_ACTION_NAME;
-            add_action( 'admin_notices', array($this, 'run_notice') );
             $this->log_event('Cron: wp_tuxedo_admin_cron_task force run run....', 'notice');
-            $this->tuxedo_instance->run();
+            $this->tuxedo_api_events_instance->run();
+
+            // redirecting to logs page
             wp_redirect( admin_url( '/tools.php?page=wp_tuxedo_logs' ) );
+
+            // TODO: not working..
+            // set admin_notices
+            add_action( 'admin_notices', array($this, 'admin_notices') );
             exit;
         }
     }
 
-    public function run_notice() {
+    public function admin_notices() {
         ?>
         <div class="notice notice-success is-dismissible">
-            <p><?php _e( 'Done!', 'sample-text-domain' ); ?></p>
+            <p><?php _e( 'Done!' ); ?></p>
         </div>
         <?php
     }
@@ -164,7 +169,7 @@ class WP_Tuxedo_Admin
 
         if (isset($this->settings['tuxedo_active'])) {
             $this->log_event('Cron: wp_tuxedo_admin_cron_task starting...', 'notice');
-            $this->tuxedo_instance->run();
+            $this->tuxedo_api_events_instance->run();
         } else {
             $this->log_event('Cron: wp_tuxedo_admin_cron_task is paused, passing...', 'warning');
         }

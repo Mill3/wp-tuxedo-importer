@@ -1,8 +1,7 @@
 <?php
 
-// if(!function_exists('wp_get_current_user')) {
-//     include(ABSPATH . "wp-includes/pluggable.php");
-// }
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) exit;
 
 /**
  * The file that defines the core plugin class
@@ -123,6 +122,7 @@ class WP_Tuxedo
          */
         require_once plugin_dir_path(dirname(__FILE__)) . 'tuxedo/class-tuxedo.php';
         require_once plugin_dir_path(dirname(__FILE__)) . 'tuxedo/class-tuxedo-events.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'tuxedo/class-tuxedo-shows.php';
 
         /**
          * The classes responsible for handling WP Post insertion
@@ -146,24 +146,15 @@ class WP_Tuxedo
         $wp_tuxedo_admin = new WP_Tuxedo_Admin($this->get_plugin_name(), $this->get_version());
         $wp_tuxedo_menu_settings = new WP_Tuxedo_Menu_Settings();
         $wp_tuxedo_menu_logs = new WP_Tuxedo_Menu_System();
+        $tuxedo_api_shows_instance = new \WP_Tuxedo\Tuxedo\Tuxedo_API_Shows();
 
         // actions
         $this->loader->add_action(WP_TUXEDO_IMPORT_ACTION_NAME, $wp_tuxedo_admin, 'wp_tuxedo_admin_cron_task');
-        // echo 'wp_ajax_' . WP_TUXEDO_NAMESPACE_PREFIX . '_run_cron';
-        // $this->loader->add_action('wp_ajax_wp_tuxedo_run_cron', $this, 'foobar');
-        // add_action( 'wp_ajax_wp_tuxedo_run_cron', array($this, 'foobar') );
-        // add_action( 'wp_ajax_nopriv_wp_tuxedo_run_cron', array($this, 'foobar') );
+        $this->loader->add_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $wp_tuxedo_admin, 'log_event', 10, 2);
 
         // filters
-        $this->loader->add_filter(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $wp_tuxedo_admin, 'log_event', 10, 2);
-
+        $this->loader->add_filter(WP_TUXEDO_NAMESPACE_PREFIX . '/tuxedo_api/get_shows', $tuxedo_api_shows_instance, 'filter_get_shows', 10, null);
     }
-
-    public function foobar() {
-        echo "1";
-        die();
-    }
-
 
     /**
      * Run the loader to execute all of the hooks with WordPress.
