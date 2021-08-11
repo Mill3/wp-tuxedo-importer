@@ -27,6 +27,12 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
     private function get_shows()
     {
 
+        // stop here if no settings saved
+        if(!$this->tuxedo_api_account_name || !$this->tuxedo_api_username || !$this->tuxedo_api_password) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo credentials not found in WP installation settings', 'error');
+            return;
+        };
+
         $body = json_encode(
             [
                 'accountName' => $this->tuxedo_api_account_name,
