@@ -14,20 +14,10 @@ use WP_Tuxedo\Tuxedo;
  * @link  https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since 0.0.1
  *
- * @package    WP_TUXEDO
- * @subpackage WP_TUXEDO/admin
+ * @package    WP_Tuxedo
+ * @subpackage WP_Tuxedo/admin
  */
 
-/**
- * The admin-specific functionality of the plugin.
- *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the admin-specific stylesheet and JavaScript.
- *
- * @package    WP_TUXEDO
- * @subpackage WP_TUXEDO/admin
- * @author     Antoine Girard <antoine@mill3.studio>
- */
 class WP_Tuxedo_Admin
 {
 

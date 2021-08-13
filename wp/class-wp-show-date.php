@@ -56,7 +56,23 @@ class ShowDate
     protected $post_ID = null;
 
 
+    /**
+     * related show post
+     *
+     * @since    0.2.0
+     * @access   protected
+     * @var      object    $related_show
+     */
     protected $related_show = null;
+
+    /**
+     * tuxedo event date parsed to php date object
+     *
+     * @since    0.2.0
+     * @access   protected
+     * @var      object    $parsed_date
+     */
+    protected $parsed_date = null;
 
     /**
      * Construct method
@@ -70,7 +86,6 @@ class ShowDate
         $this->uuid = $this->generate_uuid();
         $this->parsed_date = $this->parse_date();
         $this->related_show = $this->get_related_show();
-        // $this->post_title = $this->generate_post_title();
     }
 
     /**
@@ -82,6 +97,7 @@ class ShowDate
     public function run() {
 
         // todo: skip past show dates
+
         // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
         if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
             return;

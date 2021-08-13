@@ -73,25 +73,25 @@ if (! defined('WP_TUXEDO_POST_TYPE')) {
  * The code that runs during plugin activation.
  * This action is documented in includes/class-plugin-name-activator.php
  */
-function WP_tuxedo_activate()
+function wp_tuxedo_activate()
 {
     require_once plugin_dir_path(__FILE__) . 'includes/class-wp-tuxedo-activator.php';
-    WP_tuxedo_Activator::activate();
+    WP_Tuxedo_Activator::activate();
 }
 
-register_activation_hook(__FILE__, 'WP_tuxedo_activate');
+register_activation_hook(__FILE__, 'wp_tuxedo_activate');
 
 /**
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-tdp-tuxedo-deactivator.php
  */
-function WP_tuxedo_deactivate()
+function wp_tuxedo_deactivate()
 {
     require_once plugin_dir_path(__FILE__) . 'includes/class-wp-tuxedo-deactivator.php';
-    WP_tuxedo_Deactivator::deactivate();
+    WP_Tuxedo_Deactivator::deactivate();
 }
 
-register_deactivation_hook(__FILE__, 'WP_tuxedo_deactivate');
+register_deactivation_hook(__FILE__, 'wp_tuxedo_deactivate');
 
 /**
  * Create a cron interval for this plugin
@@ -127,10 +127,6 @@ function run_wp_tuxedo()
 {
     $root = new WP_Tuxedo();
     $root->run();
-
-    // test actions here
-    // $shows = apply_filters(WP_TUXEDO_NAMESPACE_PREFIX . '/tuxedo_api/get_shows', null);
-    // print_r($shows);
 }
 
 run_wp_tuxedo();

@@ -12,24 +12,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    WP_TUXEDO
- * @subpackage WP_TUXEDO/includes
+ * @package    WP_Tuxedo
+ * @subpackage WP_Tuxedo/includes
  */
 
-/**
- * The core plugin class.
- *
- * This is used to define internationalization, admin-specific hooks, and
- * public-facing site hooks.
- *
- * Also maintains the unique identifier of this plugin as well as the current
- * version of the plugin.
- *
- * @since      0.0.1
- * @package    WP_TUXEDO
- * @subpackage WP_TUXEDO/includes
- * @author     Antoine Girard <antoine@mill3.studio>
- */
 class WP_Tuxedo
 {
 

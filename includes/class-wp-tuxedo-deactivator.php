@@ -9,8 +9,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * @link       https://github.com/Mill3/denise-pelletier-tuxedo-importer
  * @since      0.0.1
  *
- * @package    WP_TUXEDO
- * @subpackage WP_TUXEDO/includes
+ * @package    WP_Tuxedo
+ * @subpackage WP_Tuxedo/includes
  */
 
 /**
@@ -19,11 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      0.0.1
- * @package    WP_TUXEDO
- * @subpackage WP_TUXEDO/includes
+ * @package    WP_Tuxedo
+ * @subpackage WP_Tuxedo/includes
  * @author     Antoine Girard <antoine@mill3.studio>
  */
-class WP_tuxedo_Deactivator
+class WP_Tuxedo_Deactivator
 {
 
   /**
