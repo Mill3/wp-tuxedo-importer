@@ -96,8 +96,6 @@ class ShowDate
      */
     public function run() {
 
-        // todo: skip past show dates
-
         // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
         if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
             return;
@@ -172,14 +170,12 @@ class ShowDate
         };
 
         update_field('uuid', $this->uuid, $this->post_ID);
-        update_field('date', $this->parsed_date, $this->post_ID);
+        update_field('date', $this->parsed_date->toDateTimeString(), $this->post_ID);
         update_field('tuxedo_url', $this->item->tuxedoUrl, $this->post_ID);
         update_field('tuxedo_venue_id', $this->item->venueId, $this->post_ID);
         update_field('tuxedo_is_published', $this->item->isPublished, $this->post_ID);
         update_field('tuxedo_soldout', $this->check_is_soldout(), $this->post_ID);
         update_field('school_only', $this->check_is_school_only(), $this->post_ID);
-
-        // TODO: implement
         update_field('show', $this->related_show->ID, $this->post_ID);
 
         // force update post, will populate Algolia with all fields data
