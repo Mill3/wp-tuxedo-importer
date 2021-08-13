@@ -84,6 +84,7 @@ class ShowDate
     {
         $this->item = $item;
         $this->uuid = $this->generate_uuid();
+        $this->now = Carbon::now();
         $this->parsed_date = $this->parse_date();
         $this->related_show = $this->get_related_show();
     }
@@ -100,6 +101,12 @@ class ShowDate
         if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
             return;
         }
+
+        // do not import show date set in the past
+        if( $this->parsed_date->isBefore( $this->now ) ) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date);
+            return;
+        };
 
         // generate post title
         $this->post_title = $this->generate_post_title();
@@ -182,7 +189,7 @@ class ShowDate
         $this->force_update();
 
         // send update info to loger
-        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show : ' . $this->post_title, 'warn');
+        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show date : ' . $this->post_title, 'info');
     }
 
      /**
