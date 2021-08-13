@@ -177,9 +177,9 @@ class ShowDate
         update_field('tuxedo_venue_id', $this->item->venueId, $this->post_ID);
         update_field('tuxedo_is_published', $this->item->isPublished, $this->post_ID);
         update_field('tuxedo_soldout', $this->check_is_soldout(), $this->post_ID);
+        update_field('school_only', $this->check_is_school_only(), $this->post_ID);
 
         // TODO: implement
-        // update_field('school_only', $this->check_is_school_only(), $this->post_ID);
         update_field('show', $this->related_show->ID, $this->post_ID);
 
         // force update post, will populate Algolia with all fields data
@@ -196,7 +196,7 @@ class ShowDate
      * @access   private
      */
     private function check_is_soldout() {
-        return isset($this->item->isSoldOut);
+        return (isset($this->item->isSoldOut) && $this->item->isSoldOut === true)  || (isset($this->item->status) && $this->item->status === "soldOut");
     }
 
      /**
@@ -207,7 +207,7 @@ class ShowDate
      * @access   private
      */
     private function check_is_school_only() {
-        return false;
+        return isset($this->item->status) && $this->item->status === "other";
     }
 
     /**
