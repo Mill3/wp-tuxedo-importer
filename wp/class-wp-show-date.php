@@ -199,7 +199,7 @@ class ShowDate
      * @access   private
      */
     private function check_is_soldout() {
-        return (isset($this->item->isSoldOut) && $this->item->isSoldOut === true)  || (isset($this->item->status) && $this->item->status === "soldOut");
+        return (isset($this->item->isSoldOut) && $this->item->isSoldOut === true)  || (isset($this->item->otherStatus) && $this->item->otherStatus === "soldOut");
     }
 
      /**
@@ -210,7 +210,7 @@ class ShowDate
      * @access   private
      */
     private function check_is_school_only() {
-        return isset($this->item->status) && $this->item->status === "other";
+        return isset($this->item->otherStatus) && $this->item->otherStatus === "Scolaire";
     }
 
     /**
