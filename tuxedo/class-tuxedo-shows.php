@@ -68,6 +68,7 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                             $data[] = array(
                                 'id' => $item['id'],
                                 'label' => $item['title']['french'],
+                                'tuxedoUrl' => $item['tuxedoUrl'],
                             );
                         }
                         return $data;
