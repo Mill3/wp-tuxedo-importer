@@ -115,7 +115,7 @@ class ShowDate
 
         // do not import show date set in the past
         if( $this->parsed_date->isBefore( $this->now ) ) {
-            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date . "Tuxedo ID:" . $this->item->id);
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date . " Tuxedo ID:" . $this->item->id);
             return;
         };
 
