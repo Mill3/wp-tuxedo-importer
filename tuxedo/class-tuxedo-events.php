@@ -77,8 +77,6 @@ class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                     $show_date->run();
                 }
 
-                // do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', print_r($items, true), 'notice');
-
                 // send notice
                 do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Finished importing all Tuxedo events', 'notice');
             }
