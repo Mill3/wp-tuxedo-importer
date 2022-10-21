@@ -99,12 +99,13 @@ class ShowDate
 
         // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
         if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "No related show or excluded from the web. Tuxedo ID : " . $this->item->id);
             return;
         }
 
         // do not import show date set in the past
         if( $this->parsed_date->isBefore( $this->now ) ) {
-            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date);
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date . "Tuxedo ID:" . $this->item->id);
             return;
         };
 
@@ -189,7 +190,7 @@ class ShowDate
         $this->force_update();
 
         // send update info to loger
-        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show date : ' . $this->post_title, 'info');
+        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show date : ' . $this->post_title . '. Tuxedo ID:' . $this->item->id, 'info');
     }
 
      /**
