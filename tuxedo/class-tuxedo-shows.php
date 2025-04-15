@@ -74,7 +74,7 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                         }
                         return $data;
                     },
-                    function (RequestException | ConnectException $e) {
+                    function (ConnectException $e) {
                         do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
                     }
                 );
@@ -83,7 +83,7 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                 return $promise_shows->wait();
 
             },
-            function (RequestException | ConnectException $e) {
+            function (ConnectException $e) {
                 do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
             }
         );
