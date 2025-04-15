@@ -57,6 +57,16 @@ class ShowDate
 
 
     /**
+     * WP post status
+     *
+     * @since    0.2.6
+     * @access   protected
+     * @var      string  $post_status
+     */
+    protected $post_status = 'publish';
+
+
+    /**
      * related show post
      *
      * @since    0.2.0
@@ -99,12 +109,13 @@ class ShowDate
 
         // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
         if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "No related show or excluded from the web. Tuxedo ID : " . $this->item->id);
             return;
         }
 
         // do not import show date set in the past
         if( $this->parsed_date->isBefore( $this->now ) ) {
-            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date);
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date . " Tuxedo ID:" . $this->item->id);
             return;
         };
 
@@ -113,6 +124,9 @@ class ShowDate
 
         // try to get post
         $this->post_ID = $this->get_post();
+
+        // set post status
+        $this->post_status = $this->set_post_status();
 
         // no post found, create new
         if ( ! $this->post_ID) {
@@ -140,7 +154,7 @@ class ShowDate
             'post_name' => $this->uuid,
             'post_type' => $this->post_type,
             'post_content' => $this->uuid,
-            'post_status' => 'publish'
+            'post_status' => $this->post_status
         ];
 
         // create post
@@ -189,7 +203,7 @@ class ShowDate
         $this->force_update();
 
         // send update info to loger
-        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show date : ' . $this->post_title, 'info');
+        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Created or updated show date : ' . $this->post_title . '. Tuxedo ID:' . $this->item->id, 'info');
     }
 
      /**
@@ -204,13 +218,24 @@ class ShowDate
 
      /**
      * Check if item is for schools
-     * TODO: implement, needs documentation
      *
      * @since    0.0.5
      * @access   private
      */
     private function check_is_school_only() {
         return isset($this->item->otherStatus) && $this->item->otherStatus === "Scolaire";
+    }
+
+     /**
+     * Set post status based on Tuxedo API 'isClosed' flag
+     * if exist and set to true, we set the post-status to 'draft' otherwise default to 'publish'
+     *
+     * @since    0.2.6
+     * @access   private
+     */
+    private function set_post_status() {
+        $is_closed = isset($this->item->isClosed) && $this->item->isClosed === true;
+        return $is_closed ? "draft" : "publish";
     }
 
     /**
@@ -265,7 +290,8 @@ class ShowDate
         $args = array(
             'post_type' => $this->post_type,
             'name' => $this->uuid,
-            'posts_per_page' => 1
+            'posts_per_page' => 1,
+            'post_status' => array('publish', 'draft')
         );
 
         $posts = get_posts($args);
@@ -280,9 +306,11 @@ class ShowDate
      * @access   private
      */
     private function force_update() {
+
         $fields = [
             'ID' => $this->post_ID,
-            'post_title' => $this->post_title
+            'post_title' => $this->post_title,
+            'post_status' => $this->post_status
         ];
 
         return wp_update_post($fields);
