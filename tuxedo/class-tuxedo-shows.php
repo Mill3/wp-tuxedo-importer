@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\Response;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ConnectException;
 
 
 class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
@@ -81,7 +82,7 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                         }
                         return $data;
                     },
-                    function (RequestException $e) {
+                    function (ConnectException $e) {
                         do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
                     }
                 );
@@ -90,7 +91,7 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                 return $promise_shows->wait();
 
             },
-            function (RequestException $e) {
+            function (ConnectException $e) {
                 do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
             }
         );
