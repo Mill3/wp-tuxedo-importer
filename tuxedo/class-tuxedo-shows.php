@@ -52,6 +52,10 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
 
                 // $body = $this->parse($res);
                 $parsed_body = json_decode($res->getBody());
+                if (!$parsed_body || empty($parsed_body->jwt)) {
+                    do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo auth response invalid or missing JWT', 'error');
+                    return null;
+                }
                 $bearer = $parsed_body->jwt;
                 $header = [
                     'accept' => 'application/json',
@@ -64,6 +68,10 @@ class Tuxedo_API_Shows extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                     function($res_shows) {
                         $data = [];
                         $items = json_decode($res_shows->getBody(), true);
+                        if (!$items) {
+                            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo shows response empty or invalid JSON', 'error');
+                            return [];
+                        }
                         foreach ($items as $key => $item) {
                             $data[] = array(
                                 'id' => $item['id'],

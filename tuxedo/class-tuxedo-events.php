@@ -58,6 +58,10 @@ class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
     private function parse($res)
     {
         $parsed_body = json_decode($res->getBody());
+        if (!$parsed_body || empty($parsed_body->jwt)) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo auth response invalid or missing JWT', 'error');
+            return;
+        }
         $bearer = $parsed_body->jwt;
 
         $header = [
@@ -72,13 +76,24 @@ class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
         $promise->then(
             function (ResponseInterface $res) {
                 $items = json_decode($res->getBody());
+                // error_log("Tuxedo events response : " . print_r($items, true));
+                if (!$items) {
+                    do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo events response empty or invalid JSON', 'error');
+                    return;
+                } else {
+                    do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Fetched ' . count($items) . ' Tuxedo events', 'notice');
+                }
                 foreach ($items as $key => $item) {
+                    do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Processing Tuxedo event with ID: ' . $item->id . " (" . $item->tuxedoUrl . ")" , 'notice');
                     $show_date = new \WP_Tuxedo\Wp\ShowDate($item);
                     $show_date->run();
                 }
 
                 // send notice
                 do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Finished importing all Tuxedo events', 'notice');
+            },
+            function (RequestException $e) {
+                do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
             }
         );
 

@@ -91,9 +91,9 @@ class Tuxedo_API
         }
 
         $this->tuxedo_api_base_uri = TUXEDO_BASE_URI;
-        $this->tuxedo_api_account_name = $this->settings['tuxedo_account'];
-        $this->tuxedo_api_username = $this->settings['tuxedo_username'];
-        $this->tuxedo_api_password = $this->settings['tuxedo_password'];
+        $this->tuxedo_api_account_name = $this->settings['tuxedo_account'] ?? '';
+        $this->tuxedo_api_username     = $this->settings['tuxedo_username'] ?? '';
+        $this->tuxedo_api_password     = $this->settings['tuxedo_password'] ?? '';
 
         // create client
         $this->http_client = new \GuzzleHttp\Client(

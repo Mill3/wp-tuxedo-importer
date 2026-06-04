@@ -3,7 +3,8 @@
 namespace WP_Tuxedo\Wp;
 
 use WP_Query;
-use Carbon\Carbon;
+use DateTimeZone;
+use IntlDateFormatter;
 
 class ShowDate
 {
@@ -94,7 +95,7 @@ class ShowDate
     {
         $this->item = $item;
         $this->uuid = $this->generate_uuid();
-        $this->now = Carbon::now();
+        $this->now = new \DateTime("now", new DateTimeZone("America/Toronto"));
         $this->parsed_date = $this->parse_date();
         $this->related_show = $this->get_related_show();
     }
@@ -114,7 +115,12 @@ class ShowDate
         }
 
         // do not import show date set in the past
-        if( $this->parsed_date->isBefore( $this->now ) ) {
+        if( !$this->parsed_date ) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Could not parse date for Tuxedo ID : " . $this->item->id, 'error');
+            return;
+        }
+
+        if( $this->parsed_date < $this->now ) {
             do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date . " Tuxedo ID:" . $this->item->id);
             return;
         };
@@ -191,7 +197,7 @@ class ShowDate
         };
 
         update_field('uuid', $this->uuid, $this->post_ID);
-        update_field('date', $this->parsed_date->toDateTimeString(), $this->post_ID);
+        update_field('date', $this->parsed_date->format('Y-m-d H:i:s'), $this->post_ID);
         update_field('tuxedo_url', $this->item->tuxedoUrl, $this->post_ID);
         update_field('tuxedo_venue_id', $this->item->venueId, $this->post_ID);
         update_field('tuxedo_is_published', $this->item->isPublished, $this->post_ID);
@@ -250,7 +256,7 @@ class ShowDate
         $parts = [$this->item->id, $this->item->date, $this->item->showId];
 
         // join and hash it
-        return hash('sha1', implode($parts, '-'));
+        return hash('sha1', implode('-', $parts));
     }
 
     /**
@@ -262,7 +268,8 @@ class ShowDate
     private function generate_post_title()
     {
         // join
-        return implode([$this->related_show->post_title, $this->parsed_date->locale('fr')->isoFormat('LLLL')], " @ ");
+        $fmt = new IntlDateFormatter('fr_CA', IntlDateFormatter::FULL, IntlDateFormatter::SHORT, 'America/Toronto');
+        return implode(" @ ", [$this->related_show->post_title, $fmt->format($this->parsed_date)]);
     }
 
     /**
@@ -275,8 +282,9 @@ class ShowDate
     {
         if(!$this->item->date) return;
 
-        // parse and set timezone to Tuxedo item date
-        return Carbon::parse($this->item->date)->setTimezone('America/Toronto');
+        $dt = new \DateTime($this->item->date);
+        $dt->setTimezone(new DateTimeZone('America/Toronto'));
+        return $dt;
     }
 
     /**
