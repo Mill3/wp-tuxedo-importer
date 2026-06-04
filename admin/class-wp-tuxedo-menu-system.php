@@ -204,6 +204,28 @@ CSS;
             <li><strong>Custom post type :</strong> <?= $this->system_checks_list['post_type'] ? $icon_valid : $icon_invalid ?></li>
         </ul>
 
+        <h1 class="wp-heading-block" style="margin-bottom: 1rem;">Last import</h1>
+
+        <?php
+        $stats = get_option(\WP_Tuxedo\Tuxedo\Tuxedo_API_Events::STATS_OPTION, null);
+        if ($stats) : ?>
+        <table class="widefat striped" style="max-width: 600px; margin-bottom: 2rem;">
+            <tbody>
+                <tr><th>Run at</th><td><?= esc_html($stats['run_at']) ?></td></tr>
+                <tr><th>Duration</th><td><?= esc_html($stats['duration_seconds']) ?>s</td></tr>
+                <tr><th>Fetched from Tuxedo</th><td><?= intval($stats['fetched']) ?></td></tr>
+                <tr><th>Created</th><td><?= intval($stats['created']) ?></td></tr>
+                <tr><th>Updated</th><td><?= intval($stats['updated']) ?></td></tr>
+                <tr><th>Skipped — no matching show</th><td><?= intval($stats['skipped_no_show']) ?></td></tr>
+                <tr><th>Skipped — date in past</th><td><?= intval($stats['skipped_past']) ?></td></tr>
+                <tr><th>Skipped — date parse error</th><td><?= intval($stats['skipped_date_error']) ?></td></tr>
+                <tr><th>Errors</th><td><?= intval($stats['errors']) ?></td></tr>
+            </tbody>
+        </table>
+        <?php else : ?>
+        <p style="margin-bottom: 2rem;">No import has run yet.</p>
+        <?php endif; ?>
+
         <h1 class="wp-heading-block" style="margin-bottom: 1rem;">Cron logs</h1>
 
         <div class="wp-tuxedo-log-wrap">

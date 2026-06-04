@@ -12,12 +12,36 @@ use GuzzleHttp\Exception\RequestException;
 
 class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
 {
+    const STATS_OPTION = 'wp_tuxedo_last_import_stats';
+
+    /** @var array */
+    private array $stats = [];
+
+    /** @var float */
+    private float $start_time = 0.0;
+
+    private function save_stats(): void
+    {
+        update_option(self::STATS_OPTION, $this->stats, false);
+    }
+
     public function run()
     {
-        // log start
         do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Starting show_date importation..', 'notice');
 
-        // start with auth
+        $this->stats = [
+            'run_at'              => (new \DateTime('now', new \DateTimeZone('America/Toronto')))->format('Y-m-d H:i:s'),
+            'duration_seconds'    => 0,
+            'fetched'             => 0,
+            'created'             => 0,
+            'updated'             => 0,
+            'skipped_no_show'     => 0,
+            'skipped_past'        => 0,
+            'skipped_date_error'  => 0,
+            'errors'              => 0,
+        ];
+
+        $this->start_time = microtime(true);
         $this->auth();
     }
 
@@ -76,26 +100,45 @@ class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
         $promise->then(
             function (ResponseInterface $res) {
                 $items = json_decode($res->getBody());
-                // error_log("Tuxedo events response : " . print_r($items, true));
                 if (!$items) {
                     do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Tuxedo events response empty or invalid JSON', 'error');
+                    $this->stats['errors']++;
+                    $this->save_stats();
                     return;
-                } else {
-                    do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Fetched ' . count($items) . ' Tuxedo events', 'notice');
                 }
-                foreach ($items as $key => $item) {
+
+                $this->stats['fetched'] = count($items);
+                do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Fetched ' . $this->stats['fetched'] . ' Tuxedo events', 'notice');
+
+                foreach ($items as $item) {
                     try {
-                        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Processing Tuxedo event with ID: ' . $item->id . " (" . $item->tuxedoUrl . ")" , 'notice');
+                        // do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Processing Tuxedo event with ID: ' . $item->id . ' (' . $item->tuxedoUrl . ')', 'notice');
                         $show_date = new \WP_Tuxedo\Wp\ShowDate($item);
-                        $show_date->run();
+                        $result    = $show_date->run();
+                        $this->stats[$result] = ($this->stats[$result] ?? 0) + 1;
                     } catch (\Throwable $e) {
-                        // error_log('[wp-tuxedo] Error on event ' . ($item->id ?? 'unknown') . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+                        $this->stats['errors']++;
                         do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Error processing Tuxedo event with ID: ' . (print_r($item, true)) . '. Error: ' . $e->getMessage(), 'error');
                     }
                 }
 
-                // send notice
-                do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Finished importing all Tuxedo events', 'notice');
+                $this->stats['duration_seconds'] = round(microtime(true) - $this->start_time, 2);
+                $this->save_stats();
+
+                do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event',
+                    sprintf(
+                        'Import complete in %ss — fetched: %d, created: %d, updated: %d, skipped (no show): %d, skipped (past): %d, skipped (date error): %d, errors: %d',
+                        $this->stats['duration_seconds'],
+                        $this->stats['fetched'],
+                        $this->stats['created'],
+                        $this->stats['updated'],
+                        $this->stats['skipped_no_show'],
+                        $this->stats['skipped_past'],
+                        $this->stats['skipped_date_error'],
+                        $this->stats['errors']
+                    ),
+                    'notice'
+                );
             },
             function (RequestException $e) {
                 do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');

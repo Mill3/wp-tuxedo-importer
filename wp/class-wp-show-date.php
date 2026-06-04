@@ -112,24 +112,27 @@ class ShowDate
      * @since    0.0.4
      * @access   public
      */
-    public function run() {
-
+    /**
+     * @return string 'created'|'updated'|'skipped_no_show'|'skipped_past'|'skipped_date_error'
+     */
+    public function run(): string
+    {
         // stops here if no show found OR $item has a bool excludedFromTheWeb set to true
         if (!$this->related_show || (isset($this->item->excludedFromTheWeb) && $this->item->excludedFromTheWeb == true)) {
-            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "No related show or excluded from the web. Tuxedo ID : " . $this->item->id);
-            return;
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "No related show or excluded from the web. Tuxedo ID : " . $this->item->id, 'notice');
+            return 'skipped_no_show';
         }
 
         // do not import show date set in the past
-        if( !$this->parsed_date ) {
+        if (!$this->parsed_date) {
             do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Could not parse date for Tuxedo ID : " . $this->item->id, 'error');
-            return;
+            return 'skipped_date_error';
         }
 
-        if( $this->parsed_date < $this->now ) {
-            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date->format('Y-m-d H:i:s') . " Tuxedo ID:" . $this->item->id);
-            return;
-        };
+        if ($this->parsed_date < $this->now) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date->format('Y-m-d H:i:s') . " Tuxedo ID:" . $this->item->id, 'notice');
+            return 'skipped_past';
+        }
 
         // generate post title
         $this->post_title = $this->generate_post_title();
@@ -141,15 +144,14 @@ class ShowDate
         $this->post_status = $this->set_post_status();
 
         // no post found, create new
-        if ( ! $this->post_ID) {
+        if (!$this->post_ID) {
             $this->create_post();
-            return;
+            return 'created';
         }
 
-        // post exist, update fields
+        // post exists, update fields
         $this->save_or_update_fields();
-
-        return $this->post_ID;
+        return 'updated';
     }
 
     /**
