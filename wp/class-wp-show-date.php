@@ -121,7 +121,7 @@ class ShowDate
         }
 
         if( $this->parsed_date < $this->now ) {
-            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date . " Tuxedo ID:" . $this->item->id);
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date->format('Y-m-d H:i:s') . " Tuxedo ID:" . $this->item->id);
             return;
         };
 
@@ -345,7 +345,13 @@ class ShowDate
             )
         );
 
+        error_log(print_r($args, true)); // --- IGNORE ---
+
         $query = new \WP_Query($args);
+
+        if(isset($query->posts[0])) {
+            error_log("get_related_show query : " . print_r($query->posts[0], true)); // --- IGNORE ---
+        }
 
         return isset($query->posts[0]) ? $query->posts[0] : null;
     }

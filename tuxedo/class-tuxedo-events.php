@@ -8,7 +8,6 @@ use WP_Tuxedo\Wp;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\ConnectException;
 
 
 class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
@@ -47,7 +46,7 @@ class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                 // parse reponse
                 $this->parse($res);
             },
-            function (ConnectException $e) {
+            function (RequestException $e) {
                 do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', $e->getMessage(), 'error');
             }
         );
@@ -85,12 +84,15 @@ class Tuxedo_API_Events extends \WP_Tuxedo\Tuxedo\Tuxedo_API
                     do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Fetched ' . count($items) . ' Tuxedo events', 'notice');
                 }
                 foreach ($items as $key => $item) {
-                    do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Processing Tuxedo event with ID: ' . $item->id . " (" . $item->tuxedoUrl . ")" , 'notice');
-                    $show_date = new \WP_Tuxedo\Wp\ShowDate($item);
-                    $show_date->run();
+                    try {
+                        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Processing Tuxedo event with ID: ' . $item->id . " (" . $item->tuxedoUrl . ")" , 'notice');
+                        $show_date = new \WP_Tuxedo\Wp\ShowDate($item);
+                        $show_date->run();
+                    } catch (\Throwable $e) {
+                        // error_log('[wp-tuxedo] Error on event ' . ($item->id ?? 'unknown') . ': ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+                        do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Error processing Tuxedo event with ID: ' . (print_r($item, true)) . '. Error: ' . $e->getMessage(), 'error');
+                    }
                 }
-
-                // do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', print_r($items, true), 'notice');
 
                 // send notice
                 do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', 'Finished importing all Tuxedo events', 'notice');
