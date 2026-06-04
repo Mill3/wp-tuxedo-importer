@@ -49,6 +49,21 @@ class WP_Tuxedo_Admin
 
     public $tuxedo_instance;
 
+    /** @var string */
+    private $logname;
+
+    /** @var \Monolog\Formatter\HtmlFormatter */
+    private $formatter;
+
+    /** @var \Monolog\Handler\RotatingFileHandler */
+    private $stream;
+
+    /** @var \WP_Tuxedo\Tuxedo\Tuxedo_API_Events */
+    private $tuxedo_api_events_instance;
+
+    /** @var array|false */
+    private $settings;
+
     /**
      * Initialize the class and set its properties.
      *

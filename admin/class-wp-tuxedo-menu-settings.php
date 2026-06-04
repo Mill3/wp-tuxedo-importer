@@ -21,6 +21,11 @@ use WP_Tuxedo\Tuxedo;
 
 class WP_Tuxedo_Menu_Settings
 {
+    /** @var string */
+    private $panel_prefix;
+
+    /** @var \TDP\OptionsKit */
+    private $panel;
 
     /**
      * Initialize the class and set its properties.

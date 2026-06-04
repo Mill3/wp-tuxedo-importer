@@ -75,6 +75,9 @@ class Tuxedo_API
      */
     protected $tuxedo_api_password;
 
+    /** @var array|false */
+    protected $settings;
+
     /**
      * Construct method
      *
@@ -99,7 +102,7 @@ class Tuxedo_API
         $this->http_client = new \GuzzleHttp\Client(
             [
                 'base_uri' => $this->tuxedo_api_base_uri,
-                'timeout'  => 2.0
+                'timeout'  => 10.0
             ]
         );
 

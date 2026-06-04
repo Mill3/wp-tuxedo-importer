@@ -85,6 +85,12 @@ class ShowDate
      */
     protected $parsed_date = null;
 
+    /** @var \DateTime */
+    protected $now;
+
+    /** @var string */
+    protected $post_title;
+
     /**
      * Construct method
      *
