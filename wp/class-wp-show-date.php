@@ -129,8 +129,9 @@ class ShowDate
             return 'skipped_date_error';
         }
 
-        if ($this->parsed_date < $this->now) {
-            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date is in the past, skip : " . $this->parsed_date->format('Y-m-d H:i:s') . " Tuxedo ID:" . $this->item->id, 'notice');
+        $cutoff = (clone $this->now)->modify('-18 months');
+        if ($this->parsed_date < $cutoff) {
+            do_action(WP_TUXEDO_NAMESPACE_PREFIX . '/log_event', "Show date older than 18 months, skip : " . $this->parsed_date->format('Y-m-d H:i:s') . " Tuxedo ID:" . $this->item->id, 'notice');
             return 'skipped_past';
         }
 
